@@ -2,12 +2,13 @@ import RefData from './RefData';
 
 export default class RowDataFactory {
 
-    createRowData() {
+    createRowData(offset=0) {
         const rowData = [];
 
-        for (let i = 0; i < 200; i++) {
+        for (let i = 0; i < 100; i++) {
             const countryData = RefData.COUNTRIES[i % RefData.COUNTRIES.length];
             rowData.push({
+                id: offset + i,
                 name: RefData.FIRST_NAMES[i % RefData.FIRST_NAMES.length] + ' ' + RefData.LAST_NAMES[i % RefData.LAST_NAMES.length],
                 skills: {
                     android: Math.random() < 0.4,

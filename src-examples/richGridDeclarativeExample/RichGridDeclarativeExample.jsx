@@ -18,6 +18,27 @@ import {AllModules} from "@ag-grid-enterprise/all-modules";
 // for community features
 // import {AllCommunityModules} from "@ag-grid-community/all-modules";
 
+const getRowId = (params) => {
+  return params.data.id;
+}
+
+const mutateSkills = (state) => {
+  return {
+    rowData: state.rowData.map((data) => {
+      return {
+        ...data,
+        skills: {
+          android: Math.random() < 0.4,
+          html5: Math.random() < 0.4,
+          mac: Math.random() < 0.4,
+          windows: Math.random() < 0.4,
+          css: Math.random() < 0.4
+        },
+      };
+    }),
+  };
+};
+
 export default class RichGridDeclarativeExample extends Component {
     constructor(props) {
         super(props);
@@ -89,7 +110,10 @@ export default class RichGridDeclarativeExample extends Component {
                             enablePivot: true,
                             sortable: false,
                             cellRenderer: SkillsCellRenderer,
-                            filter: SkillsFilter
+                            filter: SkillsFilter,
+                            equals: (skills1, skills2) => {
+                              return RefData.IT_SKILLS.every(skill => (skills1 && skills1[skill]) === (skills2 && skills2[skill]));
+                            },
                         },
                         {
                             field: "proficiency",
@@ -144,10 +168,21 @@ export default class RichGridDeclarativeExample extends Component {
     };
 
     onRefreshData = () => {
-        this.setState({
-            rowData: new RowDataFactory().createRowData()
-        });
+        this.setState((curState) => {
+          return {
+            rowData: [
+              ...curState.rowData,
+              ...new RowDataFactory().createRowData(curState.rowData.length)
+            ],
+          };
+        }, () => this.regenerateSkillsRecursive(10));
     };
+
+    regenerateSkillsRecursive = (remainingCount) => {
+      if (remainingCount > 0) {
+        this.setState(mutateSkills, () => this.regenerateSkillsRecursive(remainingCount - 1));
+      }
+    }
 
     invokeSkillsFilterMethod = () => {
         this.api.getFilterInstance('skills', (instance) => {
@@ -257,13 +292,14 @@ export default class RichGridDeclarativeExample extends Component {
                                    placeholder="Type text to filter..."/>
                         </div>
                     </div>
-                    <div style={{height: 650, width: '100%'}} className="ag-theme-alpine">
+                    <div style={{width: '100%'}} className="ag-theme-alpine">
                         <AgGridReact
                             // listening for events
                             onGridReady={this.onGridReady}
                             onRowSelected={this.onRowSelected}
                             onCellClicked={this.onCellClicked}
                             onModelUpdated={this.calculateRowCount}
+                            domLayout='autoHeight'
 
                             // binding to simple properties
                             sideBar={this.state.sideBar}
@@ -274,6 +310,8 @@ export default class RichGridDeclarativeExample extends Component {
 
                             // column definitions
                             columnDefs={this.state.columnDefs}
+
+                            getRowId={getRowId}
 
                             // binding to array properties
                             rowData={this.state.rowData}

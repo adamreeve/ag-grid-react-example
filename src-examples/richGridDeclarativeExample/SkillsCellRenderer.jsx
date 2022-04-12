@@ -6,9 +6,9 @@ export default class SkillsCellRenderer extends React.Component {
 
     render() {
         const skills = [];
-        const rowData = this.props.data;
+        const rowSkills = this.props.value;
         RefData.IT_SKILLS.forEach((skill) => {
-            if (rowData && rowData.skills && rowData.skills[skill]) {
+            if (rowSkills && rowSkills[skill]) {
                 skills.push(<img key={skill} src={'images/skills/' + skill + '.png'} width={16} title={skill}/>);
             }
         });
